@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-PORT=8802 #freddes port
+PORT=8811 #freddes port
 
 db_url = os.environ.get("DB_URL")
 print(os.environ.get("FOO"))
