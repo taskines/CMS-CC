@@ -1,0 +1,18 @@
+@apiURL = {{$dotenv WEBBKOMM_API}}:8801
+
+GET {{apiURL}}/test
+
+###
+POST {{apiURL}}/test
+Content-Type: application/json
+
+{ "foo": "bar" }
+
+###
+PUT {{apiURL}}/test/123
+Content-Type: application/json
+
+{ "foo": "bar" }
+
+###
+DELETE {{apiURL}}/test/234234

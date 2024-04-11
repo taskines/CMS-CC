@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hello Flask</title>
+</head>
+<body>
+    <h2>Greeting from API: <span id="resp"></span></h2>
+
+    <p>
+        My public IP: <span id="ip"></span>
+
+    </p>
+
+    <form method="post">
+        <input name="foo">
+        <input type="submit">
+
+    </form>
+
+    <script>
+        (async function () {
+            const resp = await fetch('https://vm2208.kaj.pouta.csc.fi:8801/ip');
+            const ipData = await resp.json();
+            console.log(ipData);
+            document.querySelector('#ip').innerHTML = ipData.ip;
+
+        })();
+
+
+        async function getAPI() {
+            const resp = await fetch('https://vm2208.kaj.pouta.csc.fi:8800/');
+            const respData = await resp.json();
+            document.querySelector('#resp').innerHTML = respData.greeting;
+        }
+        getAPI();
+
+    </script>
+</body>
+</html>

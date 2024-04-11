@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotellbokning</title>
+</head>
+<body>
+    <b>Boka rum</b><br>
+    Rum: <select id="room"></select> Gäst:<select id="guest"></select><br>
+
+    Bokning startdatum: <input id="datefrom" type="date">
+
+    <input id="btnBook" type="button" value="Boka">
+    <hr>
+    <ul id="bookings"></ul>
+
+    <script>
+    const API_URL = "https://vm2208.kaj.pouta.csc.fi:8802"
+
+    async function getRooms() {
+        const resp = await fetch(`${API_URL}/rooms`);
+        const rooms = await resp.json();
+
+        let roomsHtml = "<option>-- Välj rum</option>";
+        for (room of rooms) {
+            roomsHtml += `
+                <option value="${room.id}">
+                    ${room.room_number}
+                </option>
+            `;
+        }
+        document.querySelector('#room').innerHTML = roomsHtml;
+    }
+    getRooms();
+
+    async function getGuests() {
+        const resp = await fetch(`${API_URL}/guests`);
+        const guests = await resp.json();
+
+        let guestsHtml = "<option>-- Välj gäst</option>";
+        for (guest of guests) {
+            guestsHtml += `
+                <option value="${guest.id}">
+                    ${guest.firstname}
+                </option>
+            `;
+        }
+        document.querySelector('#guest').innerHTML = guestsHtml;
+    }
+    getGuests();
+
+    async function getBookings() {
+        const resp = await fetch(`${API_URL}/bookings`);
+        const bookings = await resp.json();
+
+        let bookingsHtml = "";
+        for (b of bookings) {
+            bookingsHtml += `
+                <li>${b.datefrom} Room: ${b.room_id} Guest: ${b.guest_id}</li>
+            `;
+        }
+        document.querySelector('#bookings').innerHTML = bookingsHtml;
+    }
+    getBookings();
+
+
+    async function createBooking() {
+        // Detta ska POST:as till /bookings
+        const booking = {
+            room: document.querySelector('#room').value,
+            guest: document.querySelector('#guest').value,
+            datefrom: document.querySelector('#datefrom').value
+        }
+        console.log(booking);
+        const resp = await fetch(`${API_URL}/bookings`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(booking)
+        })
+        const respData = await resp.json();
+        getBookings();
+        console.log(respData);
+    }
+
+
+    document.querySelector('#btnBook').addEventListener('click', createBooking);
+
+    </script>
+
+</body>
+</html>
