@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel booking</title>
+</head>
+<body>
+    <select name="" id="room">
+        <option value="">---VÄLJ RUM---</option>
+    </select>
+
+    <script>
+        const API_URL="https://vm2208.kaj.pouta.csc.fi:8811"
+
+        async function getRooms () {
+            resp=await fetch (`${API_URL}/rooms`) ;
+            rooms= await resp.json();
+
+            console.log (rooms)
+            for (room of rooms) {
+                document.querySelector('#room').innerHTML += `<option value="${room.id}">${room.room_number}</option>`;
+            }
+
+        }
+    </script>
+</body>
+</html>

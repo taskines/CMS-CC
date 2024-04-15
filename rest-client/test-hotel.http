@@ -1,4 +1,4 @@
-@apiURL = {{$dotenv WEBBKOMM_API}}:8802
+@apiURL = {{$dotenv WEBBKOMM_API}}:8811
 
 GET {{apiURL}}/guests
 
@@ -23,5 +23,3 @@ Content-Type: application/json
 ###
 
 GET {{apiURL}}/bookings
-
-###
