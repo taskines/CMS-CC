@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-PORT=8811 # Freddes port ANVÄND DIN EGEN!
+PORT=8812 # Freddes port ANVÄND DIN EGEN!
 
 db_url = os.environ.get("DB_URL")
 print(os.environ.get("FOO"))
@@ -27,7 +27,8 @@ roomsTEMP = [
 @app.route("/", )
 def info():
     #return "<h1>Hello, Flask!</h1>"
-    return "Hotel API, endpoints /rooms, /bookings"
+    return "Välkommen till hotellet kära gäst!"
+
 
 
 @app.route("/guests", methods=['GET'])
@@ -68,6 +69,9 @@ def one_room_endpoint(id):
         
 @app.route("/bookings", methods=['GET', 'POST'])
 def bookings():
+    if not request.args.get('api_key'):
+         return {"msg":"Error: api_key missing!"}, 401
+    
     if request.method == 'GET':
         with conn.cursor() as cur:
             cur.execute("""SELECT  
@@ -88,7 +92,9 @@ INNER JOIN hotel_room AS r
 INNER JOIN hotel_guest AS g
   ON g.id =b.guest_id
 
-ORDER by b.datefrom""")
+WHERE g.api_key=%s                        
+                        
+ORDER by b.datefrom""", ['api_key'])
             return cur.fetchall()
         
     if request.method == 'POST':
