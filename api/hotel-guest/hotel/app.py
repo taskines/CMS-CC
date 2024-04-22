@@ -2,13 +2,15 @@ import os, psycopg
 from psycopg.rows import dict_row
 from flask import Flask, request
 from flask_cors import CORS
+from markupsafe import escape
 from dotenv import load_dotenv 
+
 
 # pip install psycopg_binary python-dotenv
 
 load_dotenv()
 
-PORT=8812 # Freddes port ANVÄND DIN EGEN!
+PORT=8811 # Freddes port ANVÄND DIN EGEN!
 
 db_url = os.environ.get("DB_URL")
 print(os.environ.get("FOO"))
@@ -18,11 +20,6 @@ conn = psycopg.connect(db_url, autocommit=True, row_factory=dict_row)
 app = Flask(__name__)
 CORS(app) # Tillåt cross-origin requests
 
-roomsTEMP = [
-    { 'number': 101, 'type': "single" },
-    { 'number': 202, 'type': "double" },
-    { 'number': 303, 'type': "suite" }
-]
 
 @app.route("/", )
 def info():
@@ -30,33 +27,15 @@ def info():
     return "Välkommen till hotellet kära gäst!"
 
 
-
-@app.route("/guests", methods=['GET'])
-def guests_endoint():
-    with conn.cursor() as cur:
-            cur.execute("""SELECT * 
-                        FROM hotel_guest 
-                        ORDER BY firstname""")
-            return cur.fetchall()
-
-
-@app.route("/rooms", methods=['GET', 'POST'])
+@app.route("/rooms", methods=['GET'])
 def rooms_endoint():
-    if request.method == 'POST':
-        request_body = request.get_json()
-        print(request_body)
-        roomsTEMP.append(request_body)
-        return { 
-            'msg': f"Du har skapat ett nytt rum, id: {len(roomsTEMP)-1}!"
-        }
-    else:
-        with conn.cursor() as cur:
-            cur.execute("""SELECT * 
-                        FROM hotel_room 
-                        ORDER BY room_number""")
-            return cur.fetchall()
+    with conn.cursor() as cur:
+        cur.execute("""SELECT * 
+                    FROM hotel_room 
+                    ORDER BY room_number""")
+        return cur.fetchall()
 
-@app.route("/rooms/<int:id>", methods=['GET', 'PUT', 'PATCH', 'DELETE'] )
+@app.route("/rooms/<int:id>", methods=['GET'] )
 def one_room_endpoint(id):
         if request.method == 'GET':
             with conn.cursor() as cur:
@@ -69,32 +48,43 @@ def one_room_endpoint(id):
         
 @app.route("/bookings", methods=['GET', 'POST'])
 def bookings():
-    if not request.args.get('api_key'):
-         return {"msg":"Error: api_key missing!"}, 401
+    api_key = request.args.get('api_key')
+    guest_id = None
+
+    if not api_key:
+        return { "msg": "ERROR: api_key missing!" }, 401
+
+    with conn.cursor() as cur:
+        cur.execute("""
+            SELECT id 
+            FROM hotel_guest
+            WHERE api_key = %s""", [ api_key])
+        guest = cur.fetchone()
+        if not guest:
+            return { "msg": "ERROR: bad api_key!" }, 403
     
+        guest_id = guest['id']
+
     if request.method == 'GET':
         with conn.cursor() as cur:
-            cur.execute("""SELECT  
-    b.id,
-    b.datefrom,
-    r.room_number,
-    r.type,
-    g.firstname,
-    g.address
-    
-FROM hotel_booking AS b 
+            cur.execute("""
+                    SELECT 
+                        b.*,
+                        r.room_number,
+                        r.type,
+                        g.firstname,
+                        g.address
+                    FROM hotel_booking b
 
+                    INNER JOIN hotel_room r
+                        ON r.id = b.room_id
 
-INNER JOIN hotel_room AS r
-   ON r.id =b.room_id
-   
+                    INNER JOIN hotel_guest g
+                        ON g.id = b.guest_id
 
-INNER JOIN hotel_guest AS g
-  ON g.id =b.guest_id
+                    WHERE g.id = %s
 
-WHERE g.api_key=%s                        
-                        
-ORDER by b.datefrom""", ['api_key'])
+                    ORDER by b.datefrom""", [ guest_id ])
             return cur.fetchall()
         
     if request.method == 'POST':
@@ -104,15 +94,18 @@ ORDER by b.datefrom""", ['api_key'])
                 INSERT INTO hotel_booking (
                     room_id, 
                     guest_id,
-                    datefrom
+                    datefrom,
+                    addinfo
                 ) VALUES (
                     %s, 
                     %s, 
+                    %s,
                     %s
                 ) RETURNING id""", [ 
                 body['room'], 
-                body['guest'], 
-                body['datefrom'] 
+                guest_id, 
+                body['datefrom'],
+                escape(body['addinfo'])
             ])
             result = cur.fetchone()
     

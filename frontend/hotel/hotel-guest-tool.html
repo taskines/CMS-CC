@@ -4,19 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hotel Guest Tools</title>
+
 </head>
 <body>
-    <h3>Välkommen <span id="guest-name">gäst!</span></h3>
-<ul id="bookings"></ul>
+    <h3>Välkommen <span id="guest-name"></span>!</h3>
+    
+    Rum: <select id="room"></select>, startdatum: <input id="datefrom" type="date"><br>
+    <textarea id="addinfo" placeholder="Tilläggsinformation"></textarea>
 
-Rum: <select id="room"></select> 
+    <input id="btnBook" type="button" value="Boka">
+    <hr>
 
-Bokning startdatum: <input id="datefrom" type="date">
-
-<input id="btnBook" type="button" value="Boka">
-<hr>
+    <ul id="bookings"></ul>
 
 
-    <script src="./script.js"></script>
+
+    <script src="script.js"></script>
 </body>
 </html>

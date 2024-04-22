@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-PORT=8811 # Freddes port ANVÄND DIN EGEN!
+PORT=8812 # Freddes port ANVÄND DIN EGEN!
 
 db_url = os.environ.get("DB_URL")
 print(os.environ.get("FOO"))
@@ -70,25 +70,22 @@ def one_room_endpoint(id):
 def bookings():
     if request.method == 'GET':
         with conn.cursor() as cur:
-            cur.execute("""SELECT  
-    b.id,
-    b.datefrom,
-    r.room_number,
-    r.type,
-    g.firstname,
-    g.address
-    
-FROM hotel_booking AS b 
+            cur.execute("""
+                    SELECT 
+                        b.*,
+                        r.room_number,
+                        r.type,
+                        g.firstname,
+                        g.address
+                    FROM hotel_booking b
 
+                    INNER JOIN hotel_room r
+                        ON r.id = b.room_id
 
-INNER JOIN hotel_room AS r
-   ON r.id =b.room_id
-   
+                    INNER JOIN hotel_guest g
+                        ON g.id = b.guest_id
 
-INNER JOIN hotel_guest AS g
-  ON g.id =b.guest_id
-
-ORDER by b.datefrom""")
+                    ORDER by b.datefrom""")
             return cur.fetchall()
         
     if request.method == 'POST':

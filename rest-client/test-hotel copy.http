@@ -1,10 +1,6 @@
-@apiURL = {{$dotenv WEBBKOMM_API}}:8812
-
-@api-key ={{$dotenv HOTEL_API_KEY}}
-
-GET {{apiURL}}/guests
-
-###
+@apiURL = {{$dotenv WEBBKOMM_API}}:8803
+@api_key = {{$dotenv HOTEL_API_KEY}}
+@api_key2 = {{$dotenv HOTEL_API_KEY2}}
 
 GET {{apiURL}}/rooms
 
@@ -24,5 +20,12 @@ Content-Type: application/json
 
 ###
 
-GET {{apiURL}}/bookings?api_key={{{{api-key}}}}
+GET {{apiURL}}/bookings?api_key={{api_key}}
+###
 
+GET {{apiURL}}/bookings?api_key=asdasda
+###
+
+GET {{apiURL}}/bookings
+
+###
